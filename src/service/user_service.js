@@ -39,4 +39,14 @@ userService.queryByGroup = async function ({ groupName }, { userRepository }) {
     throw err;
   }
 };
+
+userService.get = async function () {
+  try {
+    const usersArray = await userRepository.get();
+    return usersArray;
+  } catch (err) {
+    throw err;
+  }
+};
+
 module.exports = userService;
