@@ -12,7 +12,7 @@ create table users(
   account_id uuid default uuid_generate_v4(),
   first_name varchar,
   last_name varchar,
-  email varchar not null,
+  email varchar not null unique,
   group_id uuid not null,
   primary key (user_id),
   constraint fk_group
