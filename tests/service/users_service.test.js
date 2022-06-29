@@ -25,11 +25,11 @@ describe("Testing the Users Service", () => {
       { userRepository }
     );
     expect(newUser.email).toEqual(user.email);
-    expect(userRepository.create.calls.length).toBe(1);
+    expect(userRepository.create.mock.calls.length).toBe(1);
   });
   it("Should delete a user by his email", async () => {
     await userService.delete({ email }, { userRepository });
-    expect(userRepository.delete.calls.length).toBe(1);
+    expect(userRepository.delete.mock.calls.length).toBe(1);
   });
   it("Should get a user by his email", async () => {
     const foundUser = await userService.getByEmail(
@@ -37,7 +37,7 @@ describe("Testing the Users Service", () => {
       { userRepository }
     );
     expect(foundUser.email).toEqual(user.email);
-    expect(userRepository.getByEmail.calls.length).toBe(1);
+    expect(userRepository.getByEmail.mock.calls.length).toBe(1);
   });
   it("Should update an existing user by its email", async () => {
     const updatedUser = await userService.updatedUser(
@@ -45,7 +45,7 @@ describe("Testing the Users Service", () => {
       { userRepository }
     );
     expect(updatedUser.email).toEqual(user.email);
-    expect(userRepository.updateByEmail.calls.length).toBe(1);
+    expect(userRepository.updateByEmail.mock.calls.length).toBe(1);
   });
   it("Should query users by their group name", async () => {
     const usersArray = userService.queryByGroup(
