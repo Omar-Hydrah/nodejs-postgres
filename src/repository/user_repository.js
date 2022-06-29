@@ -18,8 +18,10 @@ userRepository.create = async function ({ user, groupName }) {
   const values = [user.firstName, user.lastName, user.email, groupName];
   try {
     const newUser = await client.query(query, values);
+    await client.end();
     return newUser;
   } catch (err) {
+    console.error(err);
     throw new Error(`Failed to insert user with groupName ${groupName}`);
   }
 };
@@ -37,7 +39,9 @@ userRepository.updateByEmail = async function ({ email, newUser, groupName }) {
   ];
   try {
     await client.query(query, values);
+    await client.end();
   } catch (err) {
+    console.error(err);
     throw new Error(
       `Failed to update user ${email} with groupName ${groupName}`
     );
@@ -50,8 +54,10 @@ userRepository.queryByGroup = async function ({ groupName }) {
   let values = [groupName];
   try {
     const usersArray = await client.query(query, values);
+    await client.end();
     return usersArray;
   } catch (err) {
+    console.error(err);
     throw new Error(`Group name ${groupName} not found`);
   }
 };
@@ -61,9 +67,23 @@ userRepository.getByEmail = async function ({ email }) {
   let values = [email];
   try {
     const user = await client.query(query, values);
+    await client.end();
     return user;
   } catch (err) {
+    console.error(err);
     throw new Error(`No email found in database - ${email}`);
+  }
+};
+
+userRepository.get = async function () {
+  let query = "select * from users";
+  try {
+    const usersArray = await client.query(query);
+    await client.end();
+    return usersArray;
+  } catch (err) {
+    console.error(err);
+    throw new Error("Failed to fetch all users");
   }
 };
 
@@ -72,7 +92,9 @@ userRepository.delete = async function ({ email }) {
   const values = [email];
   try {
     await client.query(query, values);
+    await client.end();
   } catch (err) {
+    console.error(err);
     throw new Error(`User by email ${email} not deleted`);
   }
 };
