@@ -1,8 +1,8 @@
 const userService = {};
 
-userService.create = async function ({ user, groupName }, { userRepository }) {
+userService.create = async function ({ user }, { userRepository }) {
   try {
-    const newUser = await userRepository.create({ user, groupName });
+    const newUser = await userRepository.create({ user });
     return newUser;
   } catch (err) {
     throw err;
@@ -23,10 +23,18 @@ userService.getByEmail = async function ({ email }, { userRepository }) {
     throw err;
   }
 };
-userService.update = async function ({ email, newUser }, { userRepository }) {
+userService.update = async function (
+  { email, user, groupName },
+  { userRepository }
+) {
   try {
-    const user = await userRepository.updateByEmail({ email, newUser });
-    return user;
+    const updatedUser = await userRepository.updateByEmail({
+      email,
+      user,
+      groupName,
+    });
+    console.log("Updated user", updatedUser);
+    return updatedUser;
   } catch (err) {
     throw err;
   }
@@ -40,7 +48,7 @@ userService.queryByGroup = async function ({ groupName }, { userRepository }) {
   }
 };
 
-userService.get = async function () {
+userService.get = async function ({ userRepository }) {
   try {
     const usersArray = await userRepository.get();
     return usersArray;
