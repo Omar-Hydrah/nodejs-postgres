@@ -13,7 +13,6 @@ userRepository.create = async function ({ user }) {
   query += "values (";
   query += "$1, $2, $3, (select group_id from groups where group_name = $4)) ";
   query += "returning *";
-  console.log("GroupName: ", user);
   const values = [user.firstName, user.lastName, user.email, user.groupName];
   try {
     const newUser = await client.query(query, values);

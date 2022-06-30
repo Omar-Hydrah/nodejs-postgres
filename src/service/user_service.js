@@ -33,7 +33,6 @@ userService.update = async function (
       user,
       groupName,
     });
-    console.log("Updated user", updatedUser);
     return updatedUser;
   } catch (err) {
     throw err;
