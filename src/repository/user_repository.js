@@ -1,45 +1,37 @@
 const { Client } = require("pg");
 
-const client = new Client({
-  user: process.env.PGUSER,
-  host: process.env.PGHOST,
-  database: process.env.PGDATABASE,
-  password: process.env.PGPASSWORD,
-  port: process.env.PGPORT,
-});
+const client = new Client();
+client
+  .connect()
+  .then(() => console.log("Connected to database"))
+  .catch((err) => console.error("Connection error", err.stack));
 
 const userRepository = {};
 
-userRepository.create = async function ({ user, groupName }) {
+userRepository.create = async function ({ user }) {
   let query = "insert into users (first_name, last_name, email, group_id) ";
   query += "values (";
-  query += "$1, $2, $3, (select group_id from grops where group_name = '$4')) ";
+  query += "$1, $2, $3, (select group_id from groups where group_name = $4)) ";
   query += "returning *";
-  const values = [user.firstName, user.lastName, user.email, groupName];
+  console.log("GroupName: ", user);
+  const values = [user.firstName, user.lastName, user.email, user.groupName];
   try {
     const newUser = await client.query(query, values);
-    await client.end();
-    return newUser;
+    return newUser.rows[0];
   } catch (err) {
     console.error(err);
     throw new Error(`Failed to insert user with groupName ${groupName}`);
   }
 };
 
-userRepository.updateByEmail = async function ({ email, newUser, groupName }) {
-  let query = "update users set first_name = $1, last_name = $2, email = $3 ";
-  query += "group_id = (select group_id from groups where group_name = '$4') ";
-  query += "where email = $5";
-  const values = [
-    newUser.firstName,
-    newUser.lastName,
-    newUser.email,
-    groupName,
-    email,
-  ];
+userRepository.updateByEmail = async function ({ email, user, groupName }) {
+  let query = "update users set first_name = $1, last_name = $2, email = $3, ";
+  query += "group_id = (select group_id from groups where group_name = $4) ";
+  query += "where email = $5 returning *";
+  const values = [user.firstName, user.lastName, user.email, groupName, email];
   try {
-    await client.query(query, values);
-    await client.end();
+    const updatedUser = await client.query(query, values);
+    return updatedUser.rows[0];
   } catch (err) {
     console.error(err);
     throw new Error(
@@ -50,12 +42,11 @@ userRepository.updateByEmail = async function ({ email, newUser, groupName }) {
 
 userRepository.queryByGroup = async function ({ groupName }) {
   let query = "select * from users where group_id = ";
-  query += "(select group_id from grops where group_name = $1)";
+  query += "(select group_id from groups where group_name = $1)";
   let values = [groupName];
   try {
     const usersArray = await client.query(query, values);
-    await client.end();
-    return usersArray;
+    return usersArray.rows;
   } catch (err) {
     console.error(err);
     throw new Error(`Group name ${groupName} not found`);
@@ -67,8 +58,7 @@ userRepository.getByEmail = async function ({ email }) {
   let values = [email];
   try {
     const user = await client.query(query, values);
-    await client.end();
-    return user;
+    return user.rows[0];
   } catch (err) {
     console.error(err);
     throw new Error(`No email found in database - ${email}`);
@@ -79,8 +69,7 @@ userRepository.get = async function () {
   let query = "select * from users";
   try {
     const usersArray = await client.query(query);
-    await client.end();
-    return usersArray;
+    return usersArray.rows;
   } catch (err) {
     console.error(err);
     throw new Error("Failed to fetch all users");
@@ -92,7 +81,6 @@ userRepository.delete = async function ({ email }) {
   const values = [email];
   try {
     await client.query(query, values);
-    await client.end();
   } catch (err) {
     console.error(err);
     throw new Error(`User by email ${email} not deleted`);
